@@ -20,7 +20,7 @@ Reportez les temps affichés dans `DEMO_CHAPTERS` (`src/components/demo-video.ts
 
 Recordly se pilote uniquement à la souris. Le reste de ce document sert à tourner la vidéo avec lui.
 
-**Durée visée : 60 à 75 secondes.** Pas de voix : la vidéo tourne en boucle, sans son, sur l'accueil.
+**Durée visée : 60 à 75 secondes, interface en anglais** (compréhensible par tous). Pas de voix : la vidéo tourne en boucle, sans son, sur l'accueil.
 
 ## Préparer
 
