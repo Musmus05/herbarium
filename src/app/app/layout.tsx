@@ -31,6 +31,8 @@ export default async function AppLayout({ children }: LayoutProps<"/app">) {
 
   return (
     <div className="min-h-dvh lg:grid lg:grid-cols-[17.5rem_1fr]">
+      {/* The rail fades in when entering the app, then stays still between sections. */}
+      <ViewTransition enter="page-swap" exit="page-swap" default="none">
       <aside className="sticky top-0 z-20 bg-fern text-fern-ink lg:h-dvh">
         {/* A fern painted with p5.brush rises behind the menu. */}
         <Forest scene="rail" duration={3000} className="absolute inset-x-0 bottom-0 hidden h-[58%] lg:block" />
@@ -64,6 +66,7 @@ export default async function AppLayout({ children }: LayoutProps<"/app">) {
           </div>
         </div>
       </aside>
+      </ViewTransition>
       <main className="min-w-0 px-4 pb-24 pt-6 sm:px-8 lg:px-12 lg:pt-10">
         {/* Cross-fades the page on navigation; see globals.css. */}
         <ViewTransition default="page-swap">

@@ -1,3 +1,4 @@
+import { ViewTransition } from "react";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { getDictionary } from "@/lib/i18n/server";
@@ -21,6 +22,8 @@ export default async function Home() {
     : { title: "Institut Pasteur", subtitle: "Computational biology internship", place: "Paris, France", sent: "14 Oct 2026", cv: "Research CV (FR)" };
 
   return (
+    // Cross-fades with the next page; see the view transitions in globals.css.
+    <ViewTransition default="page-swap">
     <div className="flex min-h-dvh flex-col">
       <div className="relative isolate flex flex-1 flex-col">
       <Forest
@@ -108,5 +111,6 @@ export default async function Home() {
         </div>
       </footer>
     </div>
+    </ViewTransition>
   );
 }
