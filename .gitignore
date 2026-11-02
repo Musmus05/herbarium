@@ -52,3 +52,7 @@ supabase/.temp
 **/.impeccable/mocks/
 .claude/settings.local.json
 **/.impeccable/questions/
+
+# Raw Recordly export and project (prepared copies live in public/demo)
+docs/demo/herbarium-demo.mp4
+docs/demo/*.recordly
