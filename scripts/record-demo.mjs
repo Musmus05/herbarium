@@ -215,6 +215,8 @@ try {
   await send("Page.enable");
   await send("Emulation.setDeviceMetricsOverride", { width: W, height: H, deviceScaleFactor: SCALE, mobile: false });
   await send("Page.addScriptToEvaluateOnNewDocument", { source: OVERLAY });
+  // The video is in English, so anyone can follow it.
+  await send("Network.setCookie", { name: "locale", value: "en", url: BASE });
 
   // Headless browsers render WebGL in software: use the recorded paintings,
   // which are the same p5.brush strokes.
@@ -230,7 +232,7 @@ try {
   chapters.push(now());
   await moveTo([560, 420], 900);
   await sleep(2600);
-  await click(byText("a", "J'ai déjà un compte"), { zoom: 1.35 });
+  await click(q('main a[href="/login"]'), { zoom: 1.35 });
   await waitForPath("/login");
   zoomTo(1, W / 2, H / 2);
   await sleep(900);
@@ -262,8 +264,8 @@ try {
   await click(q("#company"), { zoom: 1.45 });
   await type("Jardin des Plantes");
   await click(q("#role"));
-  await type("Stage en botanique");
-  await click(byText("label", "Recherche"));
+  await type("Botany internship");
+  await click(byText("label", "Research"));
   const preview = await center(q("aside[aria-label] figure"));
   await moveTo(preview, 900);
   zoomTo(1.45);
@@ -335,6 +337,9 @@ try {
 // Edit: constant frame rate, then zooms that ease between keyframes.
 
 const duration = startedAt() + 0.5;
+// Capture hiccups: gaps between screencast frames longer than 120 ms.
+const gaps = frames.slice(1).map((f, i) => [frames[i].t, f.t - frames[i].t]).filter(([, d]) => d > 0.12);
+console.log(`capture gaps > 120 ms: ${gaps.length}`, gaps.map(([t, d]) => `${t.toFixed(1)}s:${Math.round(d * 1000)}ms`).join(" "));
 const concat = frames
   .map((f, i) => `file '${f.file.replaceAll("\\", "/")}'\nduration ${((frames[i + 1]?.t ?? duration) - f.t).toFixed(4)}`)
   .join("\n");
@@ -342,7 +347,7 @@ await writeFile(path.join(work, "frames.txt"), `${concat}\nfile '${frames.at(-1)
 
 const raw = path.join(work, "raw.mp4");
 execFileSync(ffmpeg, ["-hide_banner", "-loglevel", "error", "-y", "-f", "concat", "-safe", "0", "-i", path.join(work, "frames.txt"),
-  "-vf", `fps=30,scale=${W * SCALE}:${H * SCALE}`, "-c:v", "libx264", "-preset", "veryfast", "-crf", "14", "-pix_fmt", "yuv420p", raw], { stdio: "inherit" });
+  "-vf", `scale=${W * SCALE}:${H * SCALE},framerate=fps=30`, "-c:v", "libx264", "-preset", "veryfast", "-crf", "14", "-pix_fmt", "yuv420p", raw], { stdio: "inherit" });
 
 // Each zoom eases in over 0.9 s from the previous framing.
 const EASE = 0.9;
@@ -365,7 +370,7 @@ const y = `max(0,min(ih-ih/zoom,(${piece("cy")})*ih-ih/zoom/2))`;
 
 await mkdir(path.dirname(OUT), { recursive: true });
 execFileSync(ffmpeg, ["-hide_banner", "-loglevel", "error", "-y", "-i", raw,
-  "-vf", `zoompan=z='${z}':x='${x}':y='${y}':d=1:s=1920x1200:fps=30,format=yuv420p`,
+  "-vf", `scale=${W * SCALE * 2}:${H * SCALE * 2}:flags=bicubic,zoompan=z='${z}':x='${x}':y='${y}':d=1:s=1920x1200:fps=30,format=yuv420p`,
   "-c:v", "libx264", "-preset", "slow", "-crf", "18", OUT], { stdio: "inherit" });
 
 console.log(`frames: ${frames.length}, duration: ${duration.toFixed(1)} s`);
