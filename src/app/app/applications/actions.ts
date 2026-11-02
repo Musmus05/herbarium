@@ -86,10 +86,13 @@ export async function createApplication(_prev: FormState, form: FormData): Promi
   const parsed = parse(form);
   if (!parsed.success) return { fieldErrors: fieldErrors(parsed.error) };
 
+  // The page draws the plant from this id before the record exists, so the
+  // preview and the saved specimen are the same plant.
+  const id = z.string().uuid().safeParse(form.get("id"));
   const supabase = await createClient();
   const { data, error } = await supabase
     .from("applications")
-    .insert(parsed.data as Row)
+    .insert({ ...(parsed.data as Row), ...(id.success ? { id: id.data } : {}) })
     .select("id")
     .single();
   if (error) return { error: "generic" };

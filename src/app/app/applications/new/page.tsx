@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { getDictionary } from "@/lib/i18n/server";
-import { getCvs } from "@/lib/data";
+import { getCvs, getRailStats } from "@/lib/data";
+import { accession } from "@/lib/domain";
 import { PageHeader } from "@/components/ui";
 import { ApplicationForm } from "../application-form";
 import { createApplication } from "../actions";
@@ -11,11 +12,21 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 export default async function NewApplicationPage() {
-  const [{ t }, cvs] = await Promise.all([getDictionary(), getCvs()]);
+  const [{ locale, t }, cvs, stats] = await Promise.all([getDictionary(), getCvs(), getRailStats()]);
+  // Chosen here so the preview's plant is the plant the record will have.
+  const id = crypto.randomUUID();
   return (
     <>
       <PageHeader title={t.form.newTitle} />
-      <ApplicationForm t={t} cvs={cvs} action={createApplication} cancelHref="/app/applications" />
+      <ApplicationForm
+        t={t}
+        locale={locale}
+        cvs={cvs}
+        plantSeed={id}
+        number={accession(stats.nextNumber)}
+        action={createApplication}
+        cancelHref="/app/applications"
+      />
     </>
   );
 }

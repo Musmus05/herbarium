@@ -191,6 +191,7 @@ const fr = {
     saved: "Fiche enregistrée.",
     error: "L'enregistrement a échoué. Vérifiez les champs et réessayez.",
     optional: "facultatif",
+    preview: "Aperçu de la fiche",
   },
   detail: {
     label: "Étiquette",
@@ -484,6 +485,7 @@ const en: Dictionary = {
     saved: "Record saved.",
     error: "Saving failed. Check the fields and try again.",
     optional: "optional",
+    preview: "Record preview",
   },
   detail: {
     label: "Label",
