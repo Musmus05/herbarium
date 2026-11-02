@@ -2,14 +2,14 @@
 
 import { useEffect, useRef, useState } from "react";
 
-/** Recorded with Recordly following docs/demo/SCENARIO.md. */
+/** Recorded by scripts/record-demo.mjs following docs/demo/SCENARIO.md. */
 export const DEMO_VIDEO = { src: "/demo/herbarium-demo.mp4", poster: "/demo/herbarium-demo-poster.webp" };
 
 /** Start time (seconds) of each chapter in the recording. */
-export const DEMO_CHAPTERS = [0, 12, 22, 46, 50, 56, 62] as const;
+export const DEMO_CHAPTERS = [0, 12, 19, 40, 45, 52, 57] as const;
 
 /** Switch on once the recording is in public/demo (see docs/demo/SCENARIO.md). */
-export const DEMO_READY = false;
+export const DEMO_READY = true;
 
 /**
  * The walkthrough video on a herbarium sheet. Plays muted and looped while

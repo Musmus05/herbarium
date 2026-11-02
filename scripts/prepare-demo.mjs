@@ -27,7 +27,7 @@ console.log("poster", size("public/demo/herbarium-demo-poster.webp"));
 const [start = "22", duration = "20"] = process.argv.slice(2);
 run([
   "-ss", start, "-t", duration, "-i", input,
-  "-vf", "fps=12,scale=900:-2:flags=lanczos,split[a][b];[a]palettegen=max_colors=128[p];[b][p]paletteuse=dither=sierra2_4a",
+  "-vf", "fps=10,scale=800:-2:flags=lanczos,split[a][b];[a]palettegen=max_colors=128[p];[b][p]paletteuse=dither=sierra2_4a",
   "docs/demo/herbarium-demo.gif",
 ]);
 console.log("gif", size("docs/demo/herbarium-demo.gif"));

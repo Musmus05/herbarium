@@ -1,6 +1,24 @@
 # Vidéo de démo : scénario de tournage
 
-La vidéo de la page d'accueil et du README est tournée avec [Recordly](https://github.com/webadderallorg/Recordly) (zoom automatique, curseur lissé). Ce scénario permet de la refaire à l'identique après une évolution de l'interface.
+La vidéo de la page d'accueil et du README suit ce scénario. Elle est produite automatiquement, et peut aussi être tournée à la main avec [Recordly](https://github.com/webadderallorg/Recordly).
+
+## Refaire la vidéo automatiquement
+
+`scripts/record-demo.mjs` joue ce scénario dans Edge sans fenêtre, sur un build de production local, avec un curseur lissé, des effets de clic et des zooms qui suivent l'action (comme le zoom automatique de Recordly) :
+
+```bash
+npx supabase start
+npm run demo:reset                 # remet les 17 candidatures d'exemple
+npm run build && npx next start -p 3100
+node scripts/record-demo.mjs       # écrit docs/demo/herbarium-demo.mp4 et affiche les temps des chapitres
+npm run demo -- 19 20              # vidéo web, image d'attente, GIF du README (début 19 s, 20 s)
+```
+
+Reportez les temps affichés dans `DEMO_CHAPTERS` (`src/components/demo-video.tsx`).
+
+## Tourner à la main avec Recordly
+
+Recordly se pilote uniquement à la souris. Le reste de ce document sert à tourner la vidéo avec lui.
 
 **Durée visée : 60 à 75 secondes.** Pas de voix : la vidéo tourne en boucle, sans son, sur l'accueil.
 
