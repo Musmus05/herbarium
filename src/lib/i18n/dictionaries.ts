@@ -42,6 +42,10 @@ const fr = {
       },
     ],
     privacy: "Vos données restent privées : vous seul y avez accès.",
+    demoTitle: "Comment ça marche",
+    demoLede: "Une minute pour voir une candidature passer de la fiche à la réponse, et ce que l'herbier en tire.",
+    demoLabel: "Démonstration vidéo d'Herbarium",
+    demoChapters: ["Accueil", "Vue d'ensemble", "Nouvelle candidature", "La fiche", "Mettre à jour", "Les CV", "L'analyse"],
     footer: "Projet open source, code sur GitHub.",
   },
   auth: {
@@ -336,6 +340,10 @@ const en: Dictionary = {
       },
     ],
     privacy: "Your data stays private: only you can see it.",
+    demoTitle: "How it works",
+    demoLede: "One minute to watch an application go from record to answer, and what the herbarium learns from it.",
+    demoLabel: "Herbarium video walkthrough",
+    demoChapters: ["Home", "Overview", "New application", "The record", "Updating", "CVs", "Analysis"],
     footer: "Open source project, code on GitHub.",
   },
   auth: {

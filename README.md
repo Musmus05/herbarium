@@ -24,8 +24,17 @@ Chaque candidature devient un spécimen d'herbier : une plante peinte à l'aquar
 
 ---
 
+## Voir en une minute
+
+<a href="https://herbarium-eta.vercel.app/#demo"><img src="docs/demo/herbarium-demo.gif" alt="Démonstration : création d'une candidature, l'étiquette se remplit et la plante de l'aperçu se peint, puis fleurit quand le statut passe à Entretien" width="100%" /></a>
+
+La vidéo complète (1 min, avec chapitres) est sur [la page d'accueil](https://herbarium-eta.vercel.app/#demo). Elle est produite par `scripts/record-demo.mjs`, voir [docs/demo/SCENARIO.md](docs/demo/SCENARIO.md).
+
+---
+
 ## Sommaire
 
+- [Voir en une minute](#voir-en-une-minute)
 - [Une plante qui pousse avec votre candidature](#une-plante-qui-pousse-avec-votre-candidature)
 - [Ce que fait Herbarium](#ce-que-fait-herbarium)
 - [Guide d'utilisation](#guide-dutilisation)
