@@ -1,3 +1,4 @@
+import { ViewTransition } from "react";
 import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 import { getDictionary } from "@/lib/i18n/server";
@@ -19,6 +20,8 @@ export default async function LoginPage({ searchParams }: PageProps<"/login">) {
   const next = typeof params.next === "string" ? params.next : "/app";
 
   return (
+    // Cross-fades with the next page; see the view transitions in globals.css.
+    <ViewTransition default="page-swap">
     <div className="grid min-h-dvh lg:grid-cols-[1fr_minmax(0,34rem)]">
       <aside className="relative hidden overflow-hidden bg-fern lg:block" aria-hidden>
         <div className="absolute inset-x-12 top-10 z-10">
@@ -41,5 +44,6 @@ export default async function LoginPage({ searchParams }: PageProps<"/login">) {
         </div>
       </main>
     </div>
+    </ViewTransition>
   );
 }

@@ -5,7 +5,7 @@
 //   2. npm run build && npx next start -p 3100
 //   3. node scripts/record-demo.mjs        -> docs/demo/herbarium-demo.mp4
 //   4. npm run demo                        -> web video, poster and README GIF
-import { spawn, execFileSync } from "node:child_process";
+import { spawn, spawnSync, execFileSync } from "node:child_process";
 import { mkdir, mkdtemp, rm, writeFile } from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
@@ -349,18 +349,40 @@ const raw = path.join(work, "raw.mp4");
 execFileSync(ffmpeg, ["-hide_banner", "-loglevel", "error", "-y", "-f", "concat", "-safe", "0", "-i", path.join(work, "frames.txt"),
   "-vf", `scale=${W * SCALE}:${H * SCALE},framerate=fps=30`, "-c:v", "libx264", "-preset", "veryfast", "-crf", "14", "-pix_fmt", "yuv420p", raw], { stdio: "inherit" });
 
-// Each zoom eases in over 0.9 s from the previous framing.
-const EASE = 0.9;
-const steps = zooms.map((k) => ({ ...k, t: Math.max(0, k.t) }));
+// Each zoom eases from wherever the camera is when it starts, so a zoom that
+// begins before the previous one has finished never jumps.
+const EASE = 1.1;
+const ease = (u) => {
+  const v = Math.min(1, Math.max(0, u));
+  return v * v * (3 - 2 * v);
+};
+const keys = ["z", "cx", "cy"];
+const segments = [];
+for (const k of [...zooms].sort((a, b) => a.t - b.t)) {
+  const prev = segments.at(-1);
+  const t = Math.max(0, k.t);
+  const from = prev ? Object.fromEntries(keys.map((key) => [key, prev.from[key] + (prev.to[key] - prev.from[key]) * ease((t - prev.s) / EASE)])) : { z: k.z, cx: k.cx, cy: k.cy };
+  segments.push({ s: t, from, to: { z: k.z, cx: k.cx, cy: k.cy } });
+}
+const valueAt = (key, t) => {
+  let seg = segments[0];
+  for (const candidate of segments) if (candidate.s <= t) seg = candidate;
+  return seg.from[key] + (seg.to[key] - seg.from[key]) * ease((t - seg.s) / EASE);
+};
+// Largest change between two frames, as a check that the camera moves smoothly.
+let worst = { z: 0, px: 0 };
+for (let n = 1; n < Math.ceil(duration * 30); n++) {
+  const [t0, t1] = [(n - 1) / 30, n / 30];
+  worst.z = Math.max(worst.z, Math.abs(valueAt("z", t1) - valueAt("z", t0)));
+  worst.px = Math.max(worst.px, Math.abs(valueAt("cx", t1) - valueAt("cx", t0)) * 1920, Math.abs(valueAt("cy", t1) - valueAt("cy", t0)) * 1200);
+}
+console.log(`camera: largest step per frame zoom ${worst.z.toFixed(3)}, pan ${worst.px.toFixed(1)} px`);
 const piece = (key) => {
-  let expr = String(steps[0][key]);
-  for (let i = 1; i < steps.length; i++) {
-    const a = steps[i - 1][key];
-    const b = steps[i][key];
-    const s = steps[i].t;
-    const e = `min(1,max(0,(T-${s.toFixed(3)})/${EASE}))`;
+  let expr = String(segments[0].to[key]);
+  for (const seg of segments.slice(1)) {
+    const e = `min(1,max(0,(T-${seg.s.toFixed(3)})/${EASE}))`;
     const smooth = `(${e}*${e}*(3-2*${e}))`;
-    expr = `if(lt(T,${s.toFixed(3)}),${expr},${a}+(${b - a})*${smooth})`;
+    expr = `if(lt(T,${seg.s.toFixed(3)}),${expr},${seg.from[key].toFixed(5)}+(${(seg.to[key] - seg.from[key]).toFixed(5)})*${smooth})`;
   }
   return expr.replaceAll("T", "(in/30)");
 };
@@ -369,11 +391,43 @@ const x = `max(0,min(iw-iw/zoom,(${piece("cx")})*iw-iw/zoom/2))`;
 const y = `max(0,min(ih-ih/zoom,(${piece("cy")})*ih-ih/zoom/2))`;
 
 await mkdir(path.dirname(OUT), { recursive: true });
+const zoomed = path.join(work, "zoomed.mp4");
 execFileSync(ffmpeg, ["-hide_banner", "-loglevel", "error", "-y", "-i", raw,
   "-vf", `scale=${W * SCALE * 2}:${H * SCALE * 2}:flags=bicubic,zoompan=z='${z}':x='${x}':y='${y}':d=1:s=1920x1200:fps=30,format=yuv420p`,
-  "-c:v", "libx264", "-preset", "slow", "-crf", "18", OUT], { stdio: "inherit" });
+  "-c:v", "libx264", "-preset", "slow", "-crf", "16", zoomed], { stdio: "inherit" });
 
-console.log(`frames: ${frames.length}, duration: ${duration.toFixed(1)} s`);
-console.log(`chapters: [${chapters.map((c) => Math.round(c)).join(", ")}]`);
+// Page changes are hard cuts in a headless capture (the browser's own view
+// transitions are not captured): find them by a jump in brightness and
+// replace each with a 0.35 s cross-fade.
+const FADE = 0.35;
+const stats = spawnSync(ffmpeg, ["-hide_banner", "-i", zoomed, "-vf", "signalstats,metadata=print:key=lavfi.signalstats.YAVG", "-an", "-f", "null", "-"], { encoding: "utf8", maxBuffer: 64 * 1024 * 1024 }).stderr;
+const luma = [...stats.matchAll(/YAVG=([0-9.]+)/g)].map((m) => Number(m[1]));
+const cuts = [];
+for (let n = 1; n < luma.length; n++) {
+  if (Math.abs(luma[n] - luma[n - 1]) > 18 && (!cuts.length || n - cuts.at(-1) > 15)) cuts.push(n);
+}
+const total = luma.length;
+if (cuts.length) {
+  const bounds = [0, ...cuts, total];
+  const parts = bounds.slice(0, -1).map((a, i) => `[0:v]trim=start_frame=${a}:end_frame=${bounds[i + 1]},setpts=PTS-STARTPTS[s${i}]`);
+  let chain = "";
+  let label = "s0";
+  let length = cuts[0] / 30;
+  cuts.forEach((_, i) => {
+    const out = `x${i}`;
+    chain += `;[${label}][s${i + 1}]xfade=transition=fade:duration=${FADE}:offset=${(length - FADE).toFixed(3)}[${out}]`;
+    label = out;
+    length += (bounds[i + 2] - bounds[i + 1]) / 30 - FADE;
+  });
+  execFileSync(ffmpeg, ["-hide_banner", "-loglevel", "error", "-y", "-i", zoomed, "-filter_complex", parts.join(";") + chain, "-map", `[${label}]`,
+    "-c:v", "libx264", "-preset", "slow", "-crf", "18", "-pix_fmt", "yuv420p", OUT], { stdio: "inherit" });
+} else {
+  execFileSync(ffmpeg, ["-hide_banner", "-loglevel", "error", "-y", "-i", zoomed, "-c", "copy", OUT], { stdio: "inherit" });
+}
+// Each cross-fade shortens the video by FADE seconds after its cut.
+const shifted = chapters.map((c) => c - cuts.filter((n) => n / 30 < c).length * FADE);
+
+console.log(`frames: ${frames.length}, duration: ${duration.toFixed(1)} s, cross-faded cuts: ${cuts.map((n) => (n / 30).toFixed(1) + "s").join(" ")}`);
+console.log(`chapters: [${shifted.map((c) => Math.round(c)).join(", ")}]`);
 console.log(`saved ${OUT}`);
 await rm(work, { recursive: true, force: true }).catch(() => {});
