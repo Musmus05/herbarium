@@ -8,6 +8,7 @@ import { SpecimenLabel } from "@/components/specimen-label";
 import { ButtonLink } from "@/components/ui";
 import { BrandMark } from "@/components/brand";
 import { Forest } from "@/components/forest";
+import { DEMO_READY, DemoVideo } from "@/components/demo-video";
 
 const REPO_URL = "https://github.com/Musmus05/herbarium";
 
@@ -83,6 +84,20 @@ export default async function Home() {
         </section>
       </main>
       </div>
+
+      {DEMO_READY && (
+        <section id="demo" aria-labelledby="demo-title" className="border-t border-rule bg-sheet">
+          <div className="mx-auto max-w-6xl px-4 py-16 sm:px-8 lg:py-20">
+            <h2 id="demo-title" className="font-serif text-[2rem] font-semibold leading-tight tracking-[-0.01em]">
+              {t.landing.demoTitle}
+            </h2>
+            <p className="mt-3 max-w-[56ch] text-lg text-ink-2">{t.landing.demoLede}</p>
+            <div className="mt-8">
+              <DemoVideo chapters={t.landing.demoChapters} label={t.landing.demoLabel} />
+            </div>
+          </div>
+        </section>
+      )}
 
       <footer className="border-t border-rule bg-sheet">
         <div className="mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-2 px-4 py-5 text-sm text-ink-3 sm:px-8">
