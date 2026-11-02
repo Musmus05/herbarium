@@ -67,8 +67,12 @@ export function PageHeader({
   );
 }
 
+/** Fields are ruled lines, like the blanks of a herbarium label. See .field-line in globals.css. */
 export const fieldClass =
-  "block w-full rounded-md border border-rule-strong bg-sheet-raised px-3 h-10 text-[0.9375rem] text-ink placeholder:text-ink-3 transition-colors duration-150 hover:border-ink-3 focus-visible:border-tape focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-tape/35 aria-invalid:border-danger";
+  "field-line block h-10 w-full rounded-none border-0 border-b border-rule-strong bg-transparent px-0.5 text-[0.9375rem] text-ink placeholder:text-ink-3/80 transition-[border-color,background-color,box-shadow] duration-150 hover:border-ink-3 focus-visible:border-tape focus-visible:bg-sheet-raised/70 focus-visible:shadow-[0_1px_0_0_var(--tape)] focus-visible:outline-none aria-invalid:border-danger";
+
+/** Multi-line notes on ruled paper. */
+export const ruledClass = `${fieldClass} ruled h-auto py-0`;
 
 export function Field({
   label,

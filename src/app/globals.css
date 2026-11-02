@@ -102,7 +102,7 @@ p {
   color: var(--ink);
 }
 
-:focus-visible {
+:focus-visible:not(.field-line) {
   outline: 2px solid var(--tape);
   outline-offset: 2px;
   border-radius: 3px;
@@ -218,4 +218,68 @@ textarea {
     animation-duration: 0s !important;
     animation-delay: 0s !important;
   }
+}
+
+/*
+ * Forms are filled in like a herbarium label: ruled blanks, notes on lined
+ * paper, internship types as hand-cut tags.
+ */
+select.field-line {
+  appearance: none;
+  padding-right: 1.5rem;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='none' stroke='%236a6457' stroke-width='1.6' stroke-linecap='round'%3E%3Cpath d='M4 6.5l4 4 4-4'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 2px center;
+  background-size: 14px;
+  cursor: pointer;
+}
+
+.ruled {
+  --line: 1.75rem;
+  line-height: var(--line);
+  min-height: calc(var(--line) * 4 + 1px);
+  border-bottom: 0;
+  background-image: linear-gradient(to bottom, transparent calc(var(--line) - 1px), var(--rule-strong) calc(var(--line) - 1px), var(--rule-strong) var(--line), transparent var(--line));
+  background-size: 100% var(--line);
+  background-attachment: local;
+  resize: vertical;
+}
+
+.ruled:focus-visible {
+  box-shadow: none;
+}
+
+/* Hand-cut tags: uneven corners and a slight tilt, steadied when chosen. */
+.tag-cut {
+  border-radius: 4px 10px 5px 12px / 10px 4px 12px 5px;
+  transform: rotate(var(--tilt, 0deg));
+  transition: background-color 150ms, color 150ms, border-color 150ms, transform 200ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+label:nth-child(3n + 1) > .tag-cut {
+  --tilt: -0.8deg;
+}
+
+label:nth-child(3n + 2) > .tag-cut {
+  --tilt: 0.6deg;
+}
+
+label:nth-child(3n) > .tag-cut {
+  --tilt: -0.3deg;
+}
+
+input:checked + .tag-cut {
+  --tilt: 0deg;
+}
+
+/* The eyelet of a specimen tag. */
+.tag-cut::before {
+  content: "";
+  width: 6px;
+  height: 6px;
+  margin-right: 0.55rem;
+  border-radius: 999px;
+  border: 1.25px solid currentColor;
+  opacity: 0.55;
+  flex-shrink: 0;
 }

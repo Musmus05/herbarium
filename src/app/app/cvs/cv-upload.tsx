@@ -4,7 +4,7 @@ import { useRouter } from "next/navigation";
 import { useRef, useState } from "react";
 import { Upload } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
-import { Button, Field, fieldClass } from "@/components/ui";
+import { Button, Field, fieldClass, ruledClass } from "@/components/ui";
 import type { Dictionary } from "@/lib/i18n/dictionaries";
 
 const MAX_BYTES = 5 * 1024 * 1024;
@@ -88,7 +88,7 @@ export function CvUpload({ t }: { t: Dictionary["cvs"] }) {
         />
       </Field>
       <Field label={t.notes} htmlFor="cv-notes">
-        <textarea id="cv-notes" name="notes" rows={3} className={`${fieldClass} h-auto py-2.5`} />
+        <textarea id="cv-notes" name="notes" rows={3} className={ruledClass} />
       </Field>
       <p aria-live="polite" className="text-sm text-danger empty:hidden">
         {error}
